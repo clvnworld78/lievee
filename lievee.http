@@ -1,0 +1,6 @@
+@lievee_HostAddress = http://localhost:5006
+
+GET {{lievee_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
