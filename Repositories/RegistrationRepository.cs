@@ -12,7 +12,7 @@ namespace lievee.Repositories
             _db = db;
         }
 
-        public List<RegisteredVisitor> GetRegisteredVisitors(int startDate, int endDate)
+        public List<RegisteredVisitor> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate)
         {
             var data = new List<RegisteredVisitor>();
             using var dbConn = _db.GetConnection();
