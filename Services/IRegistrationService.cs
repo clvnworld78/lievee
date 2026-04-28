@@ -6,5 +6,6 @@ namespace lievee.Services
     {
         List<RegisteredVisitor> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate);
         Task<ServiceResultNoData> RegisterVisitorDate(string link, string name, int phoneNumber, DateOnly visitDate);
+        Task<ServiceResultNoData> DeleteVisitorData(int visitorId);
     }
 }
