@@ -34,5 +34,22 @@ namespace lievee.Repositories
 
             return data;
         }
+
+        public async Task SaveNewVisitor(Visitor visitor)
+        {
+            using var dbConn = _db.GetConnection();
+
+            var query = """
+                INSERT INTO visitors (link_id, name, phone_number, visit_date)
+                VALUES ($1, $2, $3, $4)
+            """;
+            using var sql = new NpgsqlCommand(query, dbConn);
+            sql.Parameters.Add(new NpgsqlParameter { Value = visitor.LinkCode });
+            sql.Parameters.Add(new NpgsqlParameter { Value = visitor.Name });
+            sql.Parameters.Add(new NpgsqlParameter { Value = visitor.PhoneNumber });
+            sql.Parameters.Add(new NpgsqlParameter { Value = visitor.Date });
+
+            await sql.ExecuteNonQueryAsync();
+        }
     }
 }
