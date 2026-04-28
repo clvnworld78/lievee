@@ -15,5 +15,19 @@ namespace lievee.Services
         {
             return _repo.GetRegisteredVisitors(startDate, endDate);
         }
+
+        public async Task<ServiceResultNoData> RegisterVisitorDate(string link, string name, int phoneNumber, DateOnly visitDate)
+        {
+            var visitor = new Visitor { LinkCode = link, Name = name, PhoneNumber = phoneNumber, Date = visitDate };
+
+            try
+            {
+                await _repo.SaveNewVisitor(visitor);
+                return ServiceResultNoData.SuccessNoData();
+            } catch (Exception ex)
+            {
+                return ServiceResultNoData.Failed(ex.Message);
+            }
+        }
     }
 }
