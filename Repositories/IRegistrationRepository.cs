@@ -5,6 +5,8 @@ namespace lievee.Repositories
     public interface IRegistrationRepository
     {
         List<RegisteredVisitor> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate);
-        Task SaveNewVisitor(Visitor visitor);
+        Task<RegisteredVisitor?> ResolveVisitorId(int visitorId);
+        Task SaveNewVisitor(RegisteredVisitor visitor);
+        Task DeleteRegisteredVisitor(RegisteredVisitor visitor);
     }
 }
