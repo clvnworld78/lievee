@@ -57,5 +57,29 @@ namespace lievee.Controllers
 
             return Created();
         }
+
+        [HttpDelete("{visitorId}")]
+        public async Task<IActionResult> DeleteRegisteredVisitorData(int visitorId)
+        {
+            if (visitorId <= 0)
+            {
+                return BadRequest(new
+                {
+                    message = "invalid id"
+                });
+            }
+
+            var svc = await _service.DeleteVisitorData(visitorId);
+
+            if (!svc.IsSuccess)
+            {
+                return StatusCode(500, new
+                {
+                    message = svc.Err
+                });
+            }
+
+            return NoContent();
+        }
     }
 }
