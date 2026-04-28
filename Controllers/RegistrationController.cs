@@ -31,5 +31,31 @@ namespace lievee.Controllers
             var visitors = _service.GetRegisteredVisitors(startDate ?? today, endDate ?? today);
             return Ok(visitors);
         }
+
+        [HttpPost("{code}")]
+        public async Task<IActionResult> RegisterNewVisitor(string code, string name, int phoneNumber, DateOnly visitDate)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            if (visitDate > today)
+            {
+                return BadRequest(new
+                {
+                    message = "visit date cannot be later than today"
+                });
+            }
+
+            var svc = await _service.RegisterVisitorDate(code, name, phoneNumber, visitDate);
+
+            if (!svc.IsSuccess)
+            {
+                return StatusCode(500, new
+                {
+                    message = svc.Err
+                });
+            }
+
+            return Created();
+        }
     }
 }
