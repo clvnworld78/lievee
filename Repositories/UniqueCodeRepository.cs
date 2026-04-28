@@ -24,5 +24,17 @@ namespace lievee.Repositories
 
             await sql.ExecuteNonQueryAsync();
         }
+
+        public async Task<int> ResolveLinkIdAsync(string uniqueCode)
+        {
+            using var dbConn = _db.GetConnection();
+            await dbConn.OpenAsync();
+
+            var query = "SELECT link_id FROM link WHERE code = $1";
+            await using var sql = new NpgsqlCommand(query, dbConn);
+            sql.Parameters.Add(new NpgsqlParameter { Value = uniqueCode });
+
+            return await sql.ExecuteNonQueryAsync();
+        }
     }
 }
