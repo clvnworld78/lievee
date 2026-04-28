@@ -2,10 +2,20 @@
 {
     public class RegisteredVisitor
     {
-        public int Id { get; set; }
-        public int? LinkCode { get; set; }
+        public int? VisitorId { get; set; }
+        public required int LinkId { get; set; }
         public required string Name { get; set; }
         public required int PhoneNumber { get; set; }
-        public required string Date { get; set; }
+        public required DateOnly Date { get; set; }
+
+        public static RegisteredVisitor NewVisitor(int linkId, string name, int phoneNumber, DateOnly visitDate)
+        {
+            return new RegisteredVisitor { LinkId = linkId, Name = name, PhoneNumber = phoneNumber, Date = visitDate };
+        }
+
+        public static RegisteredVisitor NewRegisteredVisitor(int visitorId, int linkId, string name, int phoneNumber, DateOnly visitDate)
+        {
+            return new RegisteredVisitor { VisitorId = visitorId, LinkId = linkId, Name = name, PhoneNumber = phoneNumber, Date = visitDate };
+        }
     }
 }
