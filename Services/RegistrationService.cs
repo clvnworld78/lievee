@@ -7,10 +7,12 @@ namespace lievee.Services
     {
         private readonly IRegistrationRepository _registRepo;
         private readonly IUniqueCodeRepository _linkRepo;
-        public RegistrationService(IRegistrationRepository repo, IUniqueCodeRepository repo2)
+        private readonly IHolidayRepository _holidayRepo;
+        public RegistrationService(IRegistrationRepository repo, IUniqueCodeRepository repo2, IHolidayRepository repo3)
         {
             _registRepo = repo;
             _linkRepo = repo2;
+            _holidayRepo = repo3;
         }
 
         public List<RegisteredVisitor> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate)
@@ -22,6 +24,12 @@ namespace lievee.Services
         {
             try
             {
+                var holiday = await _holidayRepo.GetHoliday(visitDate, visitDate);
+                if (holiday.Count > 0)
+                {
+                    return ServiceResultNoData.Failed("Cannot register a visit during a holiday");
+                }
+
                 var linkId = await _linkRepo.ResolveLinkIdAsync(link);
                 var visitor = RegisteredVisitor.NewVisitor(linkId, name, phoneNumber, visitDate);
 
