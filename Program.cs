@@ -1,4 +1,5 @@
 using lievee.Database;
+using lievee.Middleware;
 using lievee.Repositories;
 using lievee.Services;
 
@@ -14,8 +15,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(Database.Pool);
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+
+// auth middleware
+app.UseMiddleware<Authentication>();
 
 
 // Configure the HTTP request pipeline.
