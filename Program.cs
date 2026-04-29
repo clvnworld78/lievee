@@ -15,6 +15,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(Database.Pool);
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
+
+builder.Services.AddScoped<IUniqueCodeRepository, UniqueCodeRepository>();
+builder.Services.AddScoped<IUniqueCodeService, UniqueCodeService>();
+
+builder.Services.AddScoped<IHolidayRepository, HolidayRepository>();
+builder.Services.AddScoped<IHolidayService, HolidayService>();
+
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
