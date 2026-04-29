@@ -25,7 +25,7 @@ namespace lievee.Services
         public async Task<ServiceResult<List<Holiday>>> GetHolidays(DateOnly startDate, DateOnly endDate)
         {
             var data = await _repo.GetHoliday(startDate, endDate);
-            if (data == null)
+            if (data.Count == 0)
             {
                 return ServiceResult<List<Holiday>>.Failed("No holiday data found");
             }
