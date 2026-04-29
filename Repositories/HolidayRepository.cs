@@ -30,7 +30,7 @@ namespace lievee.Repositories
             }
         }
 
-        public async Task<List<Holiday>?> GetHoliday(DateOnly startDate, DateOnly endDate)
+        public async Task<List<Holiday>> GetHoliday(DateOnly startDate, DateOnly endDate)
         {
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
@@ -58,7 +58,7 @@ namespace lievee.Repositories
 
             if (holidays.Count == 0)
             {
-                return null;
+                return [];
             }
 
             return holidays;
