@@ -51,7 +51,6 @@ namespace lievee.Repositories
 
             using var reader = await sql.ExecuteReaderAsync();
 
-            RegisteredVisitor data;
             if (await reader.ReadAsync())
             {
                 return RegisteredVisitor.NewRegisteredVisitor(
