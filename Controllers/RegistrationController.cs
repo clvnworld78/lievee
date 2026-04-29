@@ -1,6 +1,7 @@
 ﻿using lievee.Models;
 using lievee.Repositories;
 using lievee.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lievee.Controllers
@@ -15,6 +16,7 @@ namespace lievee.Controllers
             _service = service;
         }
 
+        [Authorize(Roles = nameof(UserRole.Admin))]
         [HttpGet]
         public IActionResult GetRegisteredVisitors(DateOnly? startDate, DateOnly? endDate)
         {
@@ -58,6 +60,7 @@ namespace lievee.Controllers
             return Created();
         }
 
+        [Authorize(Roles = nameof(UserRole.Admin))]
         [HttpDelete("{visitorId}")]
         public async Task<IActionResult> DeleteRegisteredVisitorData(int visitorId)
         {
