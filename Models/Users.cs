@@ -17,7 +17,7 @@
 
         public static Users NewInvalidUser()
         {
-            return new Users { Id = 0, Username = "", Password = [], Role = UserRole.User, Valid = false };
+            return new Users { Id = 0, Username = "", Password = [], Role = UserRole.user, Valid = false };
         }
 
         public static Users NewLogin(long id, string username, byte[] hashedPass, UserRole role)
@@ -28,7 +28,7 @@
 
     public enum UserRole
     {
-        Admin,
-        User
+        admin,
+        user
     }
 }
