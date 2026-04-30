@@ -5,8 +5,9 @@
         public bool IsSuccess { get; private set; }
         public T? Data { get; private set; }
         public string? Err { get; private set; }
+        public int StatusCode { get; private set; }
 
-        public static ServiceResult<T> Success(T _data) => new ServiceResult<T> { IsSuccess = true, Data = _data };
-        public static ServiceResult<T> Failed(string msg) => new ServiceResult<T> { IsSuccess = false, Err = msg };
+        public static ServiceResult<T> Success(T _data ) => new ServiceResult<T> { IsSuccess = true, Data = _data };
+        public static ServiceResult<T> Failed(string msg, int _statusCode) => new ServiceResult<T> { IsSuccess = false, Err = msg, StatusCode = _statusCode };
     }
 }
