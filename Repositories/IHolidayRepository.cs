@@ -6,7 +6,7 @@ namespace lievee.Repositories
     {
         Task SaveNewHoliday(Holiday newHoliday);
         Task<List<Holiday>> GetHoliday(DateOnly startDate, DateOnly endDate);
-        Task UpdateHoliday(int holidayId, DateOnly newDate);
-        Task DeleteHoliday(int holidayId);
+        Task UpdateHoliday(long holidayId, DateOnly newDate);
+        Task DeleteHoliday(long holidayId);
     }
 }
