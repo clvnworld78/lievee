@@ -1,8 +1,11 @@
-﻿using lievee.Models;
+﻿using lievee.Global;
+using lievee.Models;
+using lievee.Models.Endpoint;
 using lievee.Repositories;
 using lievee.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace lievee.Controllers
 {
@@ -16,13 +19,13 @@ namespace lievee.Controllers
             _service = service;
         }
 
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        [Authorize(Roles = nameof(UserRole.admin))]
         [HttpGet]
-        public IActionResult GetRegisteredVisitors(DateOnly? startDate, DateOnly? endDate)
+        public async Task<IActionResult> GetRegisteredVisitors([FromQuery] DateOnly? StartDate, [FromQuery] DateOnly? EndDate)
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            if (startDate > endDate)
+            if (StartDate > EndDate)
             {
                 return BadRequest(new
                 {
@@ -30,25 +33,32 @@ namespace lievee.Controllers
                 });
             }
 
-            var visitors = _service.GetRegisteredVisitors(startDate ?? today, endDate ?? today);
-            return Ok(visitors);
+            var visitors = await _service.GetRegisteredVisitors(StartDate ?? today, EndDate ?? today);
+            return Ok(new
+            {
+                message = "Visitor data is successfully fetched",
+                data = visitors.Data
+            });
         }
 
         [HttpPost("{code}")]
-        public async Task<IActionResult> RegisterNewVisitor(string code, string name, int phoneNumber, DateOnly visitDate)
+        public async Task<IActionResult> RegisterNewVisitor
+            (
+                [FromRoute] Guid code,
+                [FromBody] NewVisitorDataRequest visitorData
+            )
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            if (visitDate > today)
+            if (visitorData.VisitDate < today)
             {
                 return BadRequest(new
                 {
-                    message = "visit date cannot be later than today"
+                    message = "visit date already passed"
                 });
             }
 
-            var svc = await _service.RegisterVisitorDate(code, name, phoneNumber, visitDate);
-
+            var svc = await _service.RegisterVisitorDate(code, visitorData.Name, visitorData.PhoneNumber, visitorData.VisitDate);
             if (!svc.IsSuccess)
             {
                 return StatusCode(500, new
@@ -57,12 +67,15 @@ namespace lievee.Controllers
                 });
             }
 
-            return Created();
+            return StatusCode(201, new
+            {
+                message = "successfully registered visit date"
+            });
         }
 
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        [Authorize(Roles = nameof(UserRole.admin))]
         [HttpDelete("{visitorId}")]
-        public async Task<IActionResult> DeleteRegisteredVisitorData(int visitorId)
+        public async Task<IActionResult> DeleteRegisteredVisitorData([FromRoute] int visitorId)
         {
             if (visitorId <= 0)
             {
