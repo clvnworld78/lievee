@@ -1,6 +1,7 @@
 ﻿using lievee.Database;
 using lievee.Models;
 using Npgsql;
+using System.Threading.Tasks;
 
 namespace lievee.Repositories
 {
@@ -12,10 +13,11 @@ namespace lievee.Repositories
             _db = db;
         }
 
-        public List<RegisteredVisitor> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate)
+        public async Task<List<RegisteredVisitor>> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate)
         {
             var data = new List<RegisteredVisitor>();
             using var dbConn = _db.GetConnection();
+            await dbConn.OpenAsync();
             // using var tx = dbConn.BeginTransaction();
 
             var query = "SELECT visitor_id, link_id, name, phone_number, visit_date FROM visitors";
@@ -29,9 +31,11 @@ namespace lievee.Repositories
 
                 var registVisitor = RegisteredVisitor.NewRegisteredVisitor
                 (
-                    reader.GetInt32(0),
-                    reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), 
-                    DateOnly.FromDateTime(reader.GetDateTime(3))
+                    reader.GetInt64(0),
+                    reader.GetInt64(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetFieldValue<DateOnly>(4)
                 );
 
                 data.Add(registVisitor);
@@ -40,12 +44,12 @@ namespace lievee.Repositories
             return data;
         }
 
-        public async Task<RegisteredVisitor?> ResolveVisitorId(int visitorId)
+        public async Task<RegisteredVisitor?> ResolveVisitorId(long visitorId)
         {
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
 
-            var query = "SELECT (link_id, name, phone_number, visit_date) FROM visitors WHERE visitor_id = $1";
+            var query = "SELECT link_id, name, phone_number, visit_date FROM visitors WHERE visitor_id = $1";
             using var sql = new NpgsqlCommand(query, dbConn);
             sql.Parameters.Add(new NpgsqlParameter { Value = visitorId });
 
@@ -55,10 +59,10 @@ namespace lievee.Repositories
             {
                 return RegisteredVisitor.NewRegisteredVisitor(
                     visitorId,
-                    reader.GetInt32(0),
+                    reader.GetInt64(0),
                     reader.GetString(1),
-                    reader.GetInt32(2),
-                    DateOnly.FromDateTime(reader.GetDateTime(3))
+                    reader.GetString(2),
+                    reader.GetFieldValue<DateOnly>(3)
                 );
             }
 
@@ -83,7 +87,7 @@ namespace lievee.Repositories
                 sql.Parameters.Add(new NpgsqlParameter { Value = visitor.PhoneNumber });
                 sql.Parameters.Add(new NpgsqlParameter { Value = visitor.Date });
 
-                var updateQuery = "UPDATE link SET (is_used = false) WHERE link_id = $1";
+                var updateQuery = "UPDATE link SET is_used = TRUE WHERE link_id = $1";
 
                 using var updateSql = new NpgsqlCommand(updateQuery, dbConn);
                 updateSql.Parameters.Add(new NpgsqlParameter { Value = visitor.LinkId });
@@ -116,8 +120,8 @@ namespace lievee.Repositories
                 using var linkSql = new NpgsqlCommand(delLinkQuery, dbConn);
                 linkSql.Parameters.Add(new NpgsqlParameter { Value = visitor.LinkId });
 
-                await visitorSql.ExecuteReaderAsync();
-                await linkSql.ExecuteReaderAsync();
+                await visitorSql.ExecuteNonQueryAsync();
+                await linkSql.ExecuteNonQueryAsync();
 
                 await tx.CommitAsync();
             } catch
