@@ -22,7 +22,7 @@ namespace lievee.Services
                 return ServiceResult<string>.Success(uuidV4.ToString());
             } catch (Exception ex)
             {
-                return ServiceResult<string>.Failed(ex.Message);
+                return ServiceResult<string>.Failed(ex.Message, 500);
             }
         }
     }
