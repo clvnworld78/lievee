@@ -14,8 +14,10 @@ namespace lievee.Middleware
         public async Task InvokeAsync(HttpContext ctx, ISessionService service)
         {
             var token = ExtractToken(ctx.Request);
-            if (token == null)
+            if (token == Guid.Empty)
             {
+                //ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                //await ctx.Response.WriteAsync("user must be authenticated");
                 await _next(ctx);
                 return;
             }
@@ -23,8 +25,8 @@ namespace lievee.Middleware
             var svc = await service.AuthenticateUserAsync(token);
             if (!svc.IsSuccess || svc.Data == null)
             {
-                // ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                // await ctx.Response.WriteAsync("invalid or expired token");
+                //ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                //await ctx.Response.WriteAsync("invalid or expired token");
                 await _next(ctx);
                 return;
             }
@@ -32,25 +34,32 @@ namespace lievee.Middleware
             var user = svc.Data;
 
             ctx.Items[GlobalConstants.AuthUserCtx] = user;
-            ctx.User = CreateClaimsPrincipal(user);
+            var claimsPrincipal = CreateClaimsPrincipal(user);
+            ctx.User = claimsPrincipal;
 
             await _next(ctx);
         }
 
-        private string? ExtractToken(HttpRequest req)
+        private Guid ExtractToken(HttpRequest req)
         {
-            if (req.Cookies.TryGetValue(AUTH_COOKIE, out var cookieToken))
+            if (!req.Cookies.TryGetValue(AUTH_COOKIE, out var cookieToken))
             {
-                return cookieToken;
+                return Guid.Empty;
             }
-            else return null;
+
+            if (!Guid.TryParse(cookieToken, out var token))
+            {
+                return Guid.Empty;
+            }
+
+            return token;
         }
 
-        private ClaimsPrincipal? CreateClaimsPrincipal(Users? user)
+        private ClaimsPrincipal CreateClaimsPrincipal(Users user)
         {
-            if (user == null || user.Id == null || user.Username == null || user.Role == null)
+            if (user == null)
             {
-                return null;
+                return new ClaimsPrincipal(new ClaimsIdentity()); // Empty principal
             }
 
             var claims = new List<Claim>
