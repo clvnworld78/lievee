@@ -16,7 +16,7 @@ namespace lievee.Repositories
 
             try
             {
-                var query = "INSERT INTO holiday (user_id, holiday) VALUES ($1, $2)";
+                var query = "INSERT INTO holidays (user_id, holiday) VALUES ($1, $2)";
                 using var sql = new NpgsqlCommand(query, dbConn);
                 sql.Parameters.Add(new NpgsqlParameter { Value = newHoliday.UserId });
                 sql.Parameters.Add(new NpgsqlParameter { Value = newHoliday.Date });
@@ -36,21 +36,24 @@ namespace lievee.Repositories
             await dbConn.OpenAsync();
 
             var query = """
-                SELECT (h.holiday_id, h.user_id, u.username, h.holiday)
+                SELECT h.holiday_id, h.user_id, u.username, h.holiday
                 FROM holidays h
                 JOIN users u ON h.user_id = u.user_id
+                WHERE h.holiday BETWEEN $1 AND $2
             """;
             using var sql = new NpgsqlCommand(query, dbConn);
+            sql.Parameters.Add(new NpgsqlParameter { Value = startDate });
+            sql.Parameters.Add(new NpgsqlParameter { Value = endDate });
             using var reader = await sql.ExecuteReaderAsync();
 
             var holidays = new List<Holiday>();
             while (reader.Read())
             {
                 var holiday = Holiday.NewRegisteredHoliday(
-                    reader.GetInt32(0),
-                    reader.GetInt32(1),
-                    reader.GetString(1),
-                    DateOnly.FromDateTime(reader.GetDateTime(2))
+                    reader.GetInt64(0),
+                    reader.GetInt64(1),
+                    reader.GetString(2),
+                    DateOnly.FromDateTime(reader.GetDateTime(3))
                 );
 
                 holidays.Add(holiday);
@@ -64,7 +67,7 @@ namespace lievee.Repositories
             return holidays;
         }
 
-        public async Task UpdateHoliday(int holidayId, DateOnly newDate)
+        public async Task UpdateHoliday(long holidayId, DateOnly newDate)
         {
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
@@ -72,7 +75,7 @@ namespace lievee.Repositories
 
             try
             {
-                var query = "UPDATE holidays SET (holiday = $1) WHERE holiday_id = $2";
+                var query = "UPDATE holidays SET holiday = $1 WHERE holiday_id = $2";
                 using var sql = new NpgsqlCommand(query, dbConn);
                 sql.Parameters.Add(new NpgsqlParameter { Value = newDate });
                 sql.Parameters.Add(new NpgsqlParameter { Value = holidayId });
@@ -87,7 +90,7 @@ namespace lievee.Repositories
             }
         }
 
-        public async Task DeleteHoliday(int holidayId)
+        public async Task DeleteHoliday(long holidayId)
         {
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
