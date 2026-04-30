@@ -17,15 +17,15 @@ namespace lievee.Repositories
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
             
-            var query = "INSERT INTO link (code, is_used) VALUES (@code, @is_used)";
+            var query = "INSERT INTO link (code, is_used) VALUES ($1, $2)";
             await using var sql = new NpgsqlCommand(query, dbConn);
-            sql.Parameters.AddWithValue(code.Code);
-            sql.Parameters.AddWithValue(code.IsUsed);
+            sql.Parameters.Add(new NpgsqlParameter { Value = code.Code });
+            sql.Parameters.Add(new NpgsqlParameter { Value = code.IsUsed });
 
             await sql.ExecuteNonQueryAsync();
         }
 
-        public async Task<int> ResolveLinkIdAsync(string uniqueCode)
+        public async Task<long> ResolveLinkIdAsync(Guid uniqueCode)
         {
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
@@ -34,7 +34,13 @@ namespace lievee.Repositories
             await using var sql = new NpgsqlCommand(query, dbConn);
             sql.Parameters.Add(new NpgsqlParameter { Value = uniqueCode });
 
-            return await sql.ExecuteNonQueryAsync();
+            var result = await sql.ExecuteScalarAsync();
+            if (result == null)
+            {
+                return 0;
+            }
+
+            return Convert.ToInt64(result);
         }
     }
 }
