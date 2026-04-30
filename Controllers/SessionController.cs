@@ -1,4 +1,5 @@
-﻿using lievee.Services;
+﻿using lievee.Models.Endpoint;
+using lievee.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lievee.Controllers
@@ -11,9 +12,9 @@ namespace lievee.Controllers
         public SessionController(ISessionService service) { _service = service; }
 
         [HttpPost]
-        public async Task<IActionResult> LoginAsync(string username, string password)
+        public async Task<IActionResult> LoginAsync([FromBody] UserLoginInfoRequest loginData)
         {
-            var svc = await _service.LoginAsync(username, password);
+            var svc = await _service.LoginAsync(loginData.Username, loginData.Password);
             if (!svc.IsSuccess)
             {
                 return StatusCode(500, new
