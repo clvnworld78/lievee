@@ -15,19 +15,31 @@ namespace lievee.Services
             _holidayRepo = repo3;
         }
 
-        public List<RegisteredVisitor> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate)
+        public async Task<ServiceResult<List<RegisteredVisitor>>> GetRegisteredVisitors(DateOnly startDate, DateOnly endDate)
         {
-            return _registRepo.GetRegisteredVisitors(startDate, endDate);
+            try
+            {
+                var visitors = await _registRepo.GetRegisteredVisitors(startDate, endDate);
+                if (visitors.Count == 0)
+                {
+                    return ServiceResult<List<RegisteredVisitor>>.Failed("no visitor data found", 204);
+                }
+
+                return ServiceResult<List<RegisteredVisitor>>.Success(visitors);
+            } catch (Exception ex)
+            {
+                return ServiceResult<List<RegisteredVisitor>>.Failed(ex.Message, 500);
+            }
         }
 
-        public async Task<ServiceResultNoData> RegisterVisitorDate(string link, string name, int phoneNumber, DateOnly visitDate)
+        public async Task<ServiceResultNoData> RegisterVisitorDate(Guid link, string name, string phoneNumber, DateOnly visitDate)
         {
             try
             {
                 var holiday = await _holidayRepo.GetHoliday(visitDate, visitDate);
                 if (holiday.Count > 0)
                 {
-                    return ServiceResultNoData.Failed("Cannot register a visit during a holiday");
+                    return ServiceResultNoData.Failed($"Cannot register a visit during a holiday on {visitDate}");
                 }
 
                 var linkId = await _linkRepo.ResolveLinkIdAsync(link);
