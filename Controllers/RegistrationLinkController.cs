@@ -19,7 +19,7 @@ namespace lievee.Controllers
             var svc = await _service.GenerateUniqueLinkAsync();
             if (!svc.IsSuccess)
             {
-                return StatusCode(500, new
+                return StatusCode(svc.StatusCode, new
                 {
                     message = svc.Err
                 });
