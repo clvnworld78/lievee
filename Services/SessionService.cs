@@ -1,4 +1,5 @@
-﻿using lievee.Models;
+﻿using lievee.Helper;
+using lievee.Models;
 using lievee.Repositories;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,20 +11,20 @@ namespace lievee.Services
         private readonly ISessionRepository _repo;
         public SessionService(ISessionRepository repo) { _repo = repo; }
 
-        public async Task<ServiceResult<Users>> AuthenticateUserAsync(string token)
+        public async Task<ServiceResult<Users>> AuthenticateUserAsync(Guid token)
         {
             try
             {
                 var user = await _repo.GetUserAsync(token);
                 if (!user.Valid)
                 {
-                    return ServiceResult<Users>.Failed("token is invalid or expired");
+                    return ServiceResult<Users>.Failed("token is invalid or expired", 401);
                 }
 
                 return ServiceResult<Users>.Success(user);
             } catch (Exception ex)
             {
-                return ServiceResult<Users>.Failed(ex.Message);
+                return ServiceResult<Users>.Failed(ex.Message, 500);
             }
         }
 
@@ -34,12 +35,12 @@ namespace lievee.Services
                 var user = await _repo.GetUserCredentialAsync(username);
                 if (!user.Valid)
                 {
-                    return ServiceResult<Guid>.Failed("password and username is not valid");
+                    return ServiceResult<Guid>.Failed("password and username is not valid (1)", 401);
                 }
 
-                if (user.Password != HashPasswordAsync(rawPassword))
+                if (!PasswordHasher.VerifyPassword(rawPassword, user.Password))
                 {
-                    return ServiceResult<Guid>.Failed("password and username is not valid");
+                    return ServiceResult<Guid>.Failed("password and username is not valid (2)", 401);
                 }
 
                 Guid token = Guid.NewGuid();
@@ -48,14 +49,8 @@ namespace lievee.Services
                 return ServiceResult<Guid>.Success(token);
             } catch (Exception ex)
             {
-                return ServiceResult<Guid>.Failed(ex.Message);
+                return ServiceResult<Guid>.Failed(ex.Message, 500);
             }
-        }
-
-        private byte[] HashPasswordAsync(string password)
-        {
-            var inputByte = Encoding.UTF8.GetBytes(password);
-            return SHA256.HashData(inputByte);
         }
 
         private string ConvertHashToString(byte[] hash)
