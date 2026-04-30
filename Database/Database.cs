@@ -11,7 +11,6 @@
         public NpgsqlConnection GetConnection()
         {
             var connection = new NpgsqlConnection(connectionString);
-            connection.Open();
             return connection;
         }
     }
