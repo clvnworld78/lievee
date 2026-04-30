@@ -9,13 +9,13 @@ namespace lievee.Repositories
         private readonly Database.Database _db;
         public SessionRepository(Database.Database db) { _db = db; }
 
-        public async Task<Users> GetUserAsync(string token)
+        public async Task<Users> GetUserAsync(Guid token)
         {
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
 
             var query = """
-                SELECT (s.user_id, u.username, u.password, u.role, s.expired_at)
+                SELECT s.user_id, u.username, u.password, u.role, s.expired_at
                 FROM sessions s
                 JOIN users u ON s.user_id = u.user_id
                 WHERE token = $1
@@ -57,7 +57,7 @@ namespace lievee.Repositories
             using var dbConn = _db.GetConnection();
             await dbConn.OpenAsync();
 
-            var query = "SELECT (user_id, password, role) FROM users WHERE username = $1";
+            var query = "SELECT user_id, password, role FROM users WHERE username = $1";
             using var sql = new NpgsqlCommand(query, dbConn);
             sql.Parameters.Add(new NpgsqlParameter { Value = username });
             
