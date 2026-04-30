@@ -5,6 +5,6 @@ namespace lievee.Repositories
     public interface IUniqueCodeRepository
     {
         Task SaveUniqueCode(UniqueCode code);
-        Task<int> ResolveLinkIdAsync(string uniqueCode);
+        Task<long> ResolveLinkIdAsync(Guid uniqueCode);
     }
 }
