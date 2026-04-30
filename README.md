@@ -10,11 +10,12 @@ http://localhost:5006
 
 ## Usage Flow
 
-1. Create admin and user first.
-2. Login.
-3. Use the provided cookie from login for the routes requiring admin.
-4. For registration, use `RegistrationLink` first to get the code.
-5. Use that code during `Registration POST`.
+1. Restore the Postgres18 database provided in the repo
+2. Create admin and user first.
+3. Login.
+4. Use the provided cookie from login for the routes requiring admin.
+5. For registration, use `RegistrationLink` first to get the code.
+6. Use that code during `Registration POST`.
 
 ---
 
