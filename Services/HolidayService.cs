@@ -27,13 +27,13 @@ namespace lievee.Services
             var data = await _repo.GetHoliday(startDate, endDate);
             if (data.Count == 0)
             {
-                return ServiceResult<List<Holiday>>.Failed("No holiday data found");
+                return ServiceResult<List<Holiday>>.Failed("No holiday data found", 204);
             }
             
             return ServiceResult<List<Holiday>>.Success(data);
         }
 
-        public async Task<ServiceResultNoData> UpdateHoliday(int holidayId, DateOnly newDate)
+        public async Task<ServiceResultNoData> UpdateHoliday(long holidayId, DateOnly newDate)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace lievee.Services
             }
         }
 
-        public async Task<ServiceResultNoData> DeleteHoliday(int holidayId)
+        public async Task<ServiceResultNoData> DeleteHoliday(long holidayId)
         {
             try
             {
