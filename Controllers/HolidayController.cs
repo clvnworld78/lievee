@@ -1,12 +1,13 @@
 ﻿using lievee.Global;
 using lievee.Models;
+using lievee.Models.Endpoint;
 using lievee.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lievee.Controllers
 {
-    [Authorize(Roles = nameof(UserRole.Admin))]
+    [Authorize(Roles = nameof(UserRole.admin))]
     [ApiController]
     [Route("[controller]")]
     public class HolidayController : ControllerBase
@@ -17,7 +18,7 @@ namespace lievee.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateNewHoliday(DateOnly date)
+        public async Task<IActionResult> CreateNewHoliday([FromQuery] DateOnly date)
         {
             var svc = await _service.CreateNewHoliday(date, CurrentUser);
             if (!svc.IsSuccess)
@@ -28,16 +29,21 @@ namespace lievee.Controllers
                 });
             }
 
-            return Created();
+            return StatusCode(201, new
+            {
+                message = "successfully created holiday"
+            });
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetHolidays(DateOnly startDate, DateOnly endDate)
+        public async Task<IActionResult> GetHolidays(DateOnly? StartDate, DateOnly? EndDate)
         {
-            var svc = await _service.GetHolidays(startDate, endDate);
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var svc = await _service.GetHolidays(StartDate ?? today, EndDate ?? today);
             if (!svc.IsSuccess)
             {
-                return StatusCode(500, new
+                return StatusCode(svc.StatusCode, new
                 {
                     message = svc.Err
                 });
@@ -51,9 +57,9 @@ namespace lievee.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> UpdateHoliday(int holidayId, DateOnly newDate)
+        public async Task<IActionResult> UpdateHoliday([FromBody] UpdateHolidayRequest newHoliday)
         {
-            var svc = await _service.UpdateHoliday(holidayId, newDate);
+            var svc = await _service.UpdateHoliday(newHoliday.HolidayId, newHoliday.NewDate);
             if (!svc.IsSuccess)
             {
                 return StatusCode(500, new
@@ -66,7 +72,7 @@ namespace lievee.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteHoliday(int holidayId)
+        public async Task<IActionResult> DeleteHoliday([FromQuery] int holidayId)
         {
             var svc = await _service.DeleteHoliday(holidayId);
             if (!svc.IsSuccess)
